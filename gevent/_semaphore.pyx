@@ -1,6 +1,7 @@
 import sys
 from gevent.hub import get_hub, getcurrent
 from gevent.timeout import Timeout
+from collections import deque
 
 
 __all__ = ['Semaphore']
@@ -19,7 +20,7 @@ class Semaphore(object):
     def __init__(self, value=1):
         if value < 0:
             raise ValueError("semaphore initial value must be >= 0")
-        self._links = []
+        self._links = deque()
         self.counter = value
         self._notifier = None
         # we don't want to do get_hub() here to allow module-level locks

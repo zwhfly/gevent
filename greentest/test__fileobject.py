@@ -47,6 +47,13 @@ class Test(greentest.TestCase):
         finally:
             g.kill()
 
+    def test_close_pipe(self):
+        r, w = os.pipe()
+        x = FileObject(r)
+        y = FileObject(w, 'w')
+        x.close()
+        y.close()
+
 
 def writer(fobj, line):
     for character in line:

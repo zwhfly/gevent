@@ -235,7 +235,9 @@ class FileObjectThread(object):
             return
         self._fobj = None
         try:
-            self.flush(_fobj=fobj)
+            mode = getattr(fobj, 'mode', '')
+            if 'w' in mode or 'a' in mode:
+                self.flush(_fobj=fobj)
         finally:
             if self._close:
                 fobj.close()

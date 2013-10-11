@@ -19,3 +19,7 @@ if hasattr(os, 'fork'):
     assert 'built-in' not in repr(os.fork), repr(os.fork)
 
 assert monkey.saved
+
+assert not monkey.saved.get('threading') is None
+monkey.patch_thread(Event=True)
+assert 'bla' in repr(monkey.saved['threading']['Event']), repr(monkey.saved['threading']['Event'])

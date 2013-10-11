@@ -35,6 +35,10 @@ def _get_original(name, items):
 
 
 def get_original(name, item):
+    """Retrieve the original object from a module.
+
+    If the object has not been patched, then that object will still be retrieved.
+    """
     if isinstance(item, basestring):
         return _get_original(name, [item])[0]
     else:
@@ -42,6 +46,7 @@ def get_original(name, item):
 
 
 def patch_item(module, attr, newitem):
+    """Replace *attr* in *module* with *newitem*."""
     NONE = object()
     olditem = getattr(module, attr, NONE)
     if olditem is not NONE:
@@ -50,6 +55,10 @@ def patch_item(module, attr, newitem):
 
 
 def remove_item(module, attr):
+    """Remove *attr* from *module*.
+
+    This is primarily used to force `gevent.select.select` to be used over alternatives.
+    """
     NONE = object()
     olditem = getattr(module, attr, NONE)
     if olditem is NONE:
@@ -59,6 +68,11 @@ def remove_item(module, attr):
 
 
 def patch_module(name, items=None):
+    """Patch module *name* with given *items* from the corresponding gevent submodule.
+
+    If no items are passed along, then gevent will attempt to replace all known
+    objects in the module with cooperative versions.
+    """
     gevent_module = getattr(__import__('gevent.' + name), name)
     module_name = getattr(gevent_module, '__target__', name)
     module = __import__(module_name)
@@ -78,6 +92,7 @@ def _patch_sys_std(name):
 
 
 def patch_sys(stdin=True, stdout=True, stderr=True):
+    """Replace the standard streams in :mod:`sys` with cooperative versions."""
     if stdin:
         _patch_sys_std('stdin')
     if stdout:
@@ -138,18 +153,20 @@ def patch_socket(dns=True, aggressive=True):
 
 
 def patch_dns():
+    """Replace DNS functions in :mod:`socket` with cooperative versions."""
     from gevent import socket
     patch_module('socket', items=socket.__dns__)
 
 
 def patch_ssl():
+    """Replace SSLSocket object and socket wrapping functions in :mod:`ssl` with cooperative versions."""
     patch_module('ssl')
 
 
 def patch_select(aggressive=True):
     """Replace :func:`select.select` with :func:`gevent.select.select`.
 
-    If aggressive is true (the default), also remove other blocking functions the :mod:`select`.
+    If aggressive is true (the default), also remove other blocking functions in :mod:`select`.
     """
     patch_module('select')
     if aggressive:
@@ -164,6 +181,7 @@ def patch_select(aggressive=True):
 
 
 def patch_subprocess():
+    """Replace :func:`subprocess.call`, :func:`subprocess.check_call`, :func:`subprocess.check_output` and :func:`subprocess.Popen` with cooperative versions."""
     patch_module('subprocess')
 
 

@@ -6,6 +6,7 @@ import re
 import shutil
 import traceback
 from os.path import join, abspath, basename, dirname
+from subprocess import check_call
 from glob import glob
 
 try:
@@ -113,9 +114,8 @@ def make_universal_header(filename, *defines):
 
 
 def _system(cmd):
-    cmd = ' '.join(cmd)
-    sys.stdout.write('Running %r in %s\n' % (cmd, os.getcwd()))
-    return os.system(cmd)
+    sys.stdout.write('Running %r in %s\n' % (' '.join(cmd), os.getcwd()))
+    return check_call(cmd)
 
 
 def configure_libev(bext, ext):

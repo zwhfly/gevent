@@ -75,7 +75,7 @@ travis:
 	pip install -q --download . greenlet
 	unzip -q greenlet-*.zip
 
-	ack -w subprocess greentest/ -l -v | python -c 'import sys; print "\n".join(line.split("/")[-1].strip() for line in sys.stdin)' > greentest/tests_that_dont_use_subprocess.txt
+	grep -w subprocess greentest/*.py -l -v | python -c 'import sys; print "\n".join(line.split("/")[-1].strip() for line in sys.stdin)' > greentest/tests_that_dont_use_subprocess.txt
 
 	make travistest
 

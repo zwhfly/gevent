@@ -7,12 +7,12 @@ from _socket import gaierror
 
 __all__ = ['channel']
 
-cdef object basestring
+cdef object string_types
 
 if sys.version_info[0] >= 3:
-    basestring = (bytes, str)
+    string_types = str,
 else:
-    basestring = __builtins__.basestring
+    string_types = __builtins__.basestring,
 
 TIMEOUT = 1
 
@@ -34,12 +34,13 @@ cdef extern from "dnshelper.c":
     struct ares_channeldata:
         pass
 
+    object parse_h_name(hostent*)
     object parse_h_aliases(hostent*)
     object parse_h_addr_list(hostent*)
     void* create_object_from_hostent(void*)
 
     # this imports _socket lazily
-    object PyBytes_FromString(char*)
+    object PyUnicode_FromString(char*)
     int PyTuple_Check(object)
     int PyArg_ParseTuple(object, char*, ...) except 0
     struct sockaddr_in6:
@@ -205,7 +206,7 @@ cdef void gevent_ares_host_callback(void *arg, int status, int timeouts, hostent
             callback(result(None, gaierror(status, strerror(status))))
         else:
             try:
-                host_result = ares_host_result(host.h_addrtype, (host.h_name, parse_h_aliases(host), parse_h_addr_list(host)))
+                host_result = ares_host_result(host.h_addrtype, (parse_h_name(host), parse_h_aliases(host), parse_h_addr_list(host)))
             except:
                 callback(result(None, sys.exc_info()[1]))
             else:
@@ -226,11 +227,11 @@ cdef void gevent_ares_nameinfo_callback(void *arg, int status, int timeouts, cha
             callback(result(None, gaierror(status, strerror(status))))
         else:
             if c_node:
-                node = PyBytes_FromString(c_node)
+                node = PyUnicode_FromString(c_node)
             else:
                 node = None
             if c_service:
-                service = PyBytes_FromString(c_service)
+                service = PyUnicode_FromString(c_service)
             else:
                 service = None
             callback(result((node, service)))
@@ -312,7 +313,7 @@ cdef public class channel [object PyGeventAresChannelObject, type PyGeventAresCh
             raise gaierror(cares.ARES_EDESTRUCTION, 'this ares channel has been destroyed')
         if not servers:
             servers = []
-        if isinstance(servers, basestring):
+        if isinstance(servers, string_types):
             servers = servers.split(',')
         cdef int length = len(servers)
         cdef int result, index
@@ -327,7 +328,7 @@ cdef public class channel [object PyGeventAresChannelObject, type PyGeventAresCh
             try:
                 index = 0
                 for server in servers:
-                    if isinstance(server, str):
+                    if isinstance(server, unicode):
                         server = server.encode()
                     string = <char*?>server
                     if cares.ares_inet_pton(AF_INET, string, &c_servers[index].addr) > 0:

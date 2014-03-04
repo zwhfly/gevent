@@ -1,4 +1,3 @@
-import sys
 from gevent.hub import PY3
 
 

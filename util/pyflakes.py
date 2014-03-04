@@ -12,7 +12,7 @@ gevent/_socket[23].py:\d+: undefined name
 gevent/_socketcommon.py:\d+: undefined name
 gevent/_socketcommon.py:\d+: .*imported but unused
 gevent/subprocess.py:\d+: undefined name
-gevent/ssl.py:\d+: undefined name
+gevent/_?ssl[23]?.py:\d+: undefined name
 gevent/__init__.py:\d+:.*imported but unused
 gevent/__init__.py:\d+: redefinition of unused 'signal' from line
 gevent/coros.py:\d+: 'from gevent.lock import *' used; unable to detect undefined names

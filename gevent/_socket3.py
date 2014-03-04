@@ -40,9 +40,9 @@ class socket(_socket.socket):
         _socket.socket.setblocking(self, False)
         fileno = _socket.socket.fileno(self)
         self.hub = get_hub()
-        io = self.hub.loop.io
-        self._read_event = io(fileno, 1)
-        self._write_event = io(fileno, 2)
+        io_class = self.hub.loop.io
+        self._read_event = io_class(fileno, 1)
+        self._write_event = io_class(fileno, 2)
         self.timeout = _socket.getdefaulttimeout()
 
     @property

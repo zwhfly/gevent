@@ -17,15 +17,15 @@ __dns__ = _socketcommon.__dns__
 
 if sys.version_info[:2] < (2, 7):
     _get_memory = buffer
-elif sys.version_info[:2] < (3, 0):
+else:
     def _get_memory(string, offset):
         try:
             return memoryview(string)[offset:]
         except TypeError:
+            # fixes "python2.7 array.array doesn't support memoryview used in
+            # gevent.socket.send" issue
+            # (http://code.google.com/p/gevent/issues/detail?id=94)
             return buffer(string, offset)
-else:
-    def _get_memory(string, offset):
-        return memoryview(string)[offset:]
 
 
 class _closedsocket(object):

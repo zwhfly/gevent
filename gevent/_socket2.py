@@ -11,6 +11,7 @@ For convenience, exceptions (like :class:`error <socket.error>` and :class:`time
 as well as the constants from :mod:`socket` module are imported into this module.
 """
 
+import time
 import _socketcommon
 
 for key in _socketcommon.__dict__:

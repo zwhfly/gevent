@@ -1,24 +1,4 @@
-# Copyright (c) 2005-2006, Bob Ippolito
-# Copyright (c) 2007, Linden Research, Inc.
-# Copyright (c) 2009-2012 Denis Bilenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# Copyright (c) 2009-2014 Denis Bilenko and gevent contributors. See LICENSE for details.
 
 """Cooperative socket module.
 
@@ -31,163 +11,18 @@ For convenience, exceptions (like :class:`error <socket.error>` and :class:`time
 as well as the constants from :mod:`socket` module are imported into this module.
 """
 
-from __future__ import absolute_import
+import _socketcommon
 
-# standard functions and classes that this module re-implements in a gevent-aware way:
-__implements__ = ['create_connection',
-                  'socket',
-                  'SocketType',
-                  'fromfd',
-                  'socketpair']
+for key in _socketcommon.__dict__:
+    if key.startswith('__'):
+        continue
+    globals()[key] = getattr(_socketcommon, key)
 
-__dns__ = ['getaddrinfo',
-           'gethostbyname',
-           'gethostbyname_ex',
-           'gethostbyaddr',
-           'getnameinfo',
-           'getfqdn']
-
-__implements__ += __dns__
-
-# non-standard functions that this module provides:
-__extensions__ = ['wait_read',
-                  'wait_write',
-                  'wait_readwrite']
-
-# standard functions and classes that this module re-imports
-__imports__ = ['error',
-               'gaierror',
-               'herror',
-               'htonl',
-               'htons',
-               'ntohl',
-               'ntohs',
-               'inet_aton',
-               'inet_ntoa',
-               'inet_pton',
-               'inet_ntop',
-               'timeout',
-               'gethostname',
-               'getprotobyname',
-               'getservbyname',
-               'getservbyport',
-               'getdefaulttimeout',
-               'setdefaulttimeout',
-               # Windows:
-               'errorTab']
-
-
-import sys
-import time
-from gevent.hub import get_hub, string_types, integer_types
-from gevent.timeout import Timeout
-
-is_windows = sys.platform == 'win32'
-
-if is_windows:
-    # no such thing as WSAEPERM or error code 10001 according to winsock.h or MSDN
-    from errno import WSAEINVAL as EINVAL
-    from errno import WSAEWOULDBLOCK as EWOULDBLOCK
-    from errno import WSAEINPROGRESS as EINPROGRESS
-    from errno import WSAEALREADY as EALREADY
-    from errno import WSAEISCONN as EISCONN
-    from gevent.win32util import formatError as strerror
-    EAGAIN = EWOULDBLOCK
-else:
-    from errno import EINVAL
-    from errno import EWOULDBLOCK
-    from errno import EINPROGRESS
-    from errno import EALREADY
-    from errno import EAGAIN
-    from errno import EISCONN
-    from os import strerror
-
-try:
-    from errno import EBADF
-except ImportError:
-    EBADF = 9
-
-import _socket
-_realsocket = _socket.socket
-import socket as __socket__
-_fileobject = __socket__._fileobject
-
-for name in __imports__[:]:
-    try:
-        value = getattr(__socket__, name)
-        globals()[name] = value
-    except AttributeError:
-        __imports__.remove(name)
-
-for name in __socket__.__all__:
-    value = getattr(__socket__, name)
-    if isinstance(value, integer_types) or isinstance(value, string_types):
-        globals()[name] = value
-        __imports__.append(name)
-
-del name, value
-
-
-def wait(io, timeout=None, timeout_exc=timeout('timed out')):
-    """Block the current greenlet until *io* is ready.
-
-    If *timeout* is non-negative, then *timeout_exc* is raised after *timeout* second has passed.
-    By default *timeout_exc* is ``socket.timeout('timed out')``.
-
-    If :func:`cancel_wait` is called, raise ``socket.error(EBADF, 'File descriptor was closed in another greenlet')``.
-    """
-    assert io.callback is None, 'This socket is already used by another greenlet: %r' % (io.callback, )
-    if timeout is not None:
-        timeout = Timeout.start_new(timeout, timeout_exc)
-    try:
-        return get_hub().wait(io)
-    finally:
-        if timeout is not None:
-            timeout.cancel()
-    # rename "io" to "watcher" because wait() works with any watcher
-
-
-def wait_read(fileno, timeout=None, timeout_exc=timeout('timed out')):
-    """Block the current greenlet until *fileno* is ready to read.
-
-    If *timeout* is non-negative, then *timeout_exc* is raised after *timeout* second has passed.
-    By default *timeout_exc* is ``socket.timeout('timed out')``.
-
-    If :func:`cancel_wait` is called, raise ``socket.error(EBADF, 'File descriptor was closed in another greenlet')``.
-    """
-    io = get_hub().loop.io(fileno, 1)
-    return wait(io, timeout, timeout_exc)
-
-
-def wait_write(fileno, timeout=None, timeout_exc=timeout('timed out'), event=None):
-    """Block the current greenlet until *fileno* is ready to write.
-
-    If *timeout* is non-negative, then *timeout_exc* is raised after *timeout* second has passed.
-    By default *timeout_exc* is ``socket.timeout('timed out')``.
-
-    If :func:`cancel_wait` is called, raise ``socket.error(EBADF, 'File descriptor was closed in another greenlet')``.
-    """
-    io = get_hub().loop.io(fileno, 2)
-    return wait(io, timeout, timeout_exc)
-
-
-def wait_readwrite(fileno, timeout=None, timeout_exc=timeout('timed out'), event=None):
-    """Block the current greenlet until *fileno* is ready to read or write.
-
-    If *timeout* is non-negative, then *timeout_exc* is raised after *timeout* second has passed.
-    By default *timeout_exc* is ``socket.timeout('timed out')``.
-
-    If :func:`cancel_wait` is called, raise ``socket.error(EBADF, 'File descriptor was closed in another greenlet')``.
-    """
-    io = get_hub().loop.io(fileno, 3)
-    return wait(io, timeout, timeout_exc)
-
-
-cancel_wait_ex = error(EBADF, 'File descriptor was closed in another greenlet')
-
-
-def cancel_wait(watcher):
-    get_hub().cancel_wait(watcher, cancel_wait_ex)
+__socket__ = _socketcommon.__socket__
+__implements__ = _socketcommon._implements
+__extensions__ = _socketcommon.__extensions__
+__imports__ = _socketcommon.__imports__
+__dns__ = _socketcommon.__dns__
 
 
 if sys.version_info[:2] < (2, 7):

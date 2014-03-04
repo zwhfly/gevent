@@ -13,6 +13,7 @@ __implements__ = _socketcommon._implements
 __extensions__ = _socketcommon.__extensions__
 __imports__ = _socketcommon.__imports__
 __dns__ = _socketcommon.__dns__
+_fileobject = __socket__._fileobject
 
 
 if sys.version_info[:2] < (2, 7):

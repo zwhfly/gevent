@@ -12,9 +12,10 @@ as well as the constants from :mod:`socket` module are imported into this module
 """
 
 import sys
+from gevent.hub import PY3
 
 
-if sys.version_info[0] >= 3:
+if PY3:
     from gevent import _socket3 as _source
 else:
     from gevent import _socket2 as _source
@@ -58,14 +59,16 @@ def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT, source_address=N
                 sock.bind(source_address)
             sock.connect(sa)
             return sock
-        except error as err:
+        except error as ex:
             # without exc_clear(), if connect() fails once, the socket is referenced by the frame in exc_info
             # and the next bind() fails (see test__socket.TestCreateConnection)
             # that does not happen with regular sockets though, because _socket.socket.connect() is a built-in.
             # this is similar to "getnameinfo loses a reference" failure in test_socket.py
-            sys.exc_clear()
+            if not PY3:
+                sys.exc_clear()
             if sock is not None:
                 sock.close()
+            err = ex
     if err is not None:
         raise err
     else:

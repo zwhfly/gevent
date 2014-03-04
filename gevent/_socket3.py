@@ -5,6 +5,7 @@ import time
 from gevent import _socketcommon
 from gevent.hub import text_type
 import _socket
+from io import BlockingIOError
 
 for key in _socketcommon.__dict__:
     if key.startswith('__'):
@@ -117,8 +118,8 @@ class socket(_socket.socket):
             try:
                 fd, addr = self._accept()
                 break
-            except error as ex:
-                if ex.args != EWOULDBLOCK or not self.timeout == 0.0:
+            except BlockingIOError:
+                if self.timeout == 0.0:
                     raise
             self._wait(self._read_event)
         sock = socket(self.family, self.type, self.proto, fileno=fd)

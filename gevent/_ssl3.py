@@ -168,7 +168,10 @@ class SSLSocket(socket):
                 self._wait(self._write_event, timeout_exc=_SSLErrorReadTimeout)
             except SSLError as ex:
                 if ex.args[0] == SSL_ERROR_EOF and self.suppress_ragged_eofs:
-                    return ''
+                    if buffer is None:
+                        return ''
+                    else:
+                        return 0
                 else:
                     raise
 

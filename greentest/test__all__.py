@@ -55,8 +55,6 @@ class Test(unittest.TestCase):
 
     def check_implements_presence_justified(self):
         "Check that __implements__ is present only if the module is modeled after a module from stdlib (like gevent.socket)."
-        if self.module.__name__ in 'gevent._socket2 gevent._socket3'.split():
-            return
         if self.__implements__ is not None and self.stdlib_module is None:
             raise AssertionError('%r has __implements__ but no stdlib counterpart' % self.modname)
 
@@ -142,6 +140,10 @@ are missing from %r:
             raise AssertionError(msg)
 
     def _test(self, modname):
+        if modname.endswith('2'):
+            return
+        if modname.endswith('3'):
+            return
         self.modname = modname
         six.exec_("import %s" % modname, {})
         self.module = sys.modules[modname]

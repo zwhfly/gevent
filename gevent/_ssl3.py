@@ -297,9 +297,7 @@ class SSLSocket(socket):
             nbytes = 1024
         if self._sslobj:
             if flags != 0:
-                raise ValueError(
-                  "non-zero flags not allowed in calls to recv_into() on %s" %
-                  self.__class__)
+                raise ValueError("non-zero flags not allowed in calls to recv_into() on %s" % self.__class__)
             return self.read(nbytes, buffer)
         else:
             return socket.recv_into(self, buffer, nbytes, flags)
@@ -407,9 +405,9 @@ class SSLSocket(socket):
 
         newsock, addr = socket.accept(self)
         newsock = self.context.wrap_socket(newsock,
-                    do_handshake_on_connect=self.do_handshake_on_connect,
-                    suppress_ragged_eofs=self.suppress_ragged_eofs,
-                    server_side=True)
+                                           do_handshake_on_connect=self.do_handshake_on_connect,
+                                           suppress_ragged_eofs=self.suppress_ragged_eofs,
+                                           server_side=True)
         return newsock, addr
 
     def get_channel_binding(self, cb_type="tls-unique"):
@@ -420,9 +418,7 @@ class SSLSocket(socket):
         if cb_type not in CHANNEL_BINDING_TYPES:
             raise ValueError("Unsupported channel binding type")
         if cb_type != "tls-unique":
-            raise NotImplementedError(
-                            "{0} channel binding type not implemented"
-                            .format(cb_type))
+            raise NotImplementedError("{0} channel binding type not implemented".format(cb_type))
         if self._sslobj is None:
             return None
         return self._sslobj.tls_unique_cb()

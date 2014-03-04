@@ -7,7 +7,9 @@ import glob
 
 
 IGNORED = r'''
-gevent/socket.py:\d+: undefined name
+gevent/_socket[23].py:\d+: undefined name
+gevent/_socketcommon.py:\d+: undefined name
+gevent/_socketcommon.py:\d+: .*imported but unused
 gevent/subprocess.py:\d+: undefined name
 gevent/ssl.py:\d+: undefined name
 gevent/__init__.py:\d+:.*imported but unused

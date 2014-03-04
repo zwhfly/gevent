@@ -1,18 +1,7 @@
 # Copyright (c) 2009-2014 Denis Bilenko and gevent contributors. See LICENSE for details.
 
-"""Cooperative socket module.
-
-This module provides socket operations and some related functions.
-The API of the functions and classes matches the API of the corresponding
-items in standard :mod:`socket` module exactly, but the synchronous functions
-in this module only block the current greenlet and let the others run.
-
-For convenience, exceptions (like :class:`error <socket.error>` and :class:`timeout <socket.timeout>`)
-as well as the constants from :mod:`socket` module are imported into this module.
-"""
-
 import time
-import _socketcommon
+from gevent import _socketcommon
 
 for key in _socketcommon.__dict__:
     if key.startswith('__'):

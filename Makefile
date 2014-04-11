@@ -61,6 +61,8 @@ travistest:
 travis:
 	make whitespace
 
+	sudo -E apt-get install ${PYTHON} ${PYTHON}-dev
+
 	pip install -q pep8
 	PYTHON=python make pep8
 

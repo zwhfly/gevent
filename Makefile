@@ -55,7 +55,6 @@ travistest:
 
 	cd greentest && GEVENT_RESOLVER=thread ${PYTHON} testrunner.py --expected ../known_failures.txt
 	cd greentest && GEVENT_RESOLVER=ares GEVENTARES_SERVERS=8.8.8.8 ${PYTHON} testrunner.py --expected ../known_failures.txt --ignore tests_that_dont_use_resolver.txt
-	# --ignore option does not work as expected XXX
 	cd greentest && GEVENT_FILE=thread ${PYTHON} testrunner.py --expected ../known_failures.txt --ignore tests_that_dont_use_subprocess.txt
 
 travis:

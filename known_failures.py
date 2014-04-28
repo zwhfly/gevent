@@ -18,10 +18,14 @@ FAILING_TESTS = [
     # seems to be Python/OpenSSL problem, not gevent's
     'monkey_test --Event test_ssl.py',
     'monkey_test test_ssl.py',
+
+    # Sometimes fails with AssertionError: ...\nIOError: close() called during concurrent operation on the same file object.\n'
+    # Sometimes it contains "\nUnhandled exception in thread started by \nsys.excepthook is missing\nlost sys.stderr\n"
+    "FLAKY test__subprocess_interrupted.py",
 ]
 
 
-if os.environ.get('GEVENT_RESOLVER') == 'ares':
+if os.environ.get('GEVENT_RESOLVER') == 'ares' or CPYTHON_DBG:
     # XXX fix this
     FAILING_TESTS += [
         'FLAKY test__socket_dns.py',
@@ -43,7 +47,7 @@ if sys.platform == 'win32':
 
 
 if CPYTHON_DBG:
-    FAILING_TESTS += ['test__backdoor.py']
+    FAILING_TESTS += ['FLAKY test__backdoor.py']
 
 
 if PYPY:
@@ -76,12 +80,12 @@ if PYPY:
         # No idea!
         'test_threading_2.py',
         'test_threading.py',
-        'test__example_portforwarder.py',
         'test__pywsgi.py',
         'test__backdoor.py',
         'test__refcount.py',
         'test__server.py',
         'test_subprocess.py',  # test_executable_without_cwd
+        'FLAKY test___example_servers.py'
     ]
 
 
@@ -93,12 +97,11 @@ test__example_udp_server.py
 test_close_backend_fd.py
 test__examples.py
 test__pool.py
-test___example_servers.py
+FLAKY test___example_servers.py
 test__example_udp_client.py
 test__os.py
 test__backdoor.py
 test_threading_2.py
-test_ares_timeout.py
 test__refcount.py
 test__socket.py
 test__subprocess.py
@@ -115,11 +118,17 @@ test_queue.py
 test__server_pywsgi.py
 test__core_stat.py
 test__server.py
-test__subprocess_interrupted.py
 test__example_portforwarder.py
 test__execmodules.py
-test__greenio.py
+FLAKY test__greenio.py
 '''.strip().split()
+
+    if os.environ.get('GEVENT_RESOLVER') == 'ares':
+        FAILING_TESTS += [
+            'test__socket_close.py',
+            'test__socket_timeout.py',
+            'test__socket_errors.py',
+            'test__greenness.py']
 
 
 if __name__ == '__main__':

@@ -19,7 +19,8 @@ NWORKERS = int(os.environ.get('NWORKERS') or 4)
 
 # tests that don't do well when run on busy box
 RUN_ALONE = [
-    'test__threadpool.py'
+    'test__threadpool.py',
+    'test__examples.py'
 ]
 
 

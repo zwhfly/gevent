@@ -125,9 +125,6 @@ FLAKY test__greenio.py
 
     if os.environ.get('GEVENT_RESOLVER') == 'ares':
         FAILING_TESTS += [
-            'test__socket_close.py',
-            'test__socket_timeout.py',
-            'test__socket_errors.py',
             'test__greenness.py']
 
 

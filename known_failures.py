@@ -92,7 +92,6 @@ if PYPY:
 if PY3:
     # No idea / TODO
     FAILING_TESTS += '''
-test__threading_vs_settrace.py
 test__example_udp_server.py
 test_close_backend_fd.py
 test__examples.py
@@ -114,7 +113,6 @@ test__subprocess_poll.py
 test__ssl.py
 test__makefile_ref.py
 test__socketpair.py
-test_queue.py
 test__server_pywsgi.py
 test__core_stat.py
 test__server.py
@@ -126,6 +124,11 @@ FLAKY test__greenio.py
     if os.environ.get('GEVENT_RESOLVER') == 'ares':
         FAILING_TESTS += [
             'test__greenness.py']
+
+    if CPYTHON_DBG:
+        FAILING_TESTS += ['test__threadpool.py']
+    else:
+        FAILING_TESTS += ['test_queue.py', 'test__threading_vs_settrace.py']
 
 
 if __name__ == '__main__':

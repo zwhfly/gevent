@@ -8,7 +8,7 @@ env:
   global:
     NWORKERS=1
 script:
- - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then NWORKERS=5 PYTHON=pypy make travis_pypy; fi
+ - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then NWORKERS=6 PYTHON=pypy make travis_pypy; fi
  - if [[ $TRAVIS_PYTHON_VERSION != 'pypy' ]]; then NWORKERS=4 PYTHON=python$TRAVIS_PYTHON_VERSION make travis_cpython; fi
 notifications:
   email: false

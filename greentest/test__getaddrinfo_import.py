@@ -4,3 +4,4 @@
 # that Gevent avoids this deadlock.
 
 import getaddrinfo_module
+del getaddrinfo_module  # fix pyflakes

@@ -119,7 +119,7 @@ test__server.py
 test__example_portforwarder.py
 test__execmodules.py
 FLAKY test__greenio.py
-'''.strip().split()
+'''.strip().split('\n')
 
     if os.environ.get('GEVENT_RESOLVER') == 'ares':
         FAILING_TESTS += [

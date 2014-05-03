@@ -48,6 +48,7 @@ if sys.platform == 'win32':
 
 if CPYTHON_DBG:
     FAILING_TESTS += ['FLAKY test__backdoor.py']
+    FAILING_TESTS += ['FLAKY test__os.py']
 
 
 if PYPY:

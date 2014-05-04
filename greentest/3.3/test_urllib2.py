@@ -1511,7 +1511,7 @@ class RequestTests(unittest.TestCase):
         self.assertEqual(err.info(), "Content-Length:42")
 
 def test_main(verbose=None):
-    from test import test_urllib2
+    import test_urllib2
     support.run_doctest(test_urllib2, verbose)
     support.run_doctest(urllib.request, verbose)
     tests = (TrivialTests,

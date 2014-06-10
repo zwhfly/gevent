@@ -7,6 +7,7 @@ import shutil
 import traceback
 from os.path import join, abspath, basename, dirname
 from glob import glob
+import sysconfig
 
 try:
     from setuptools import Extension, setup
@@ -51,8 +52,9 @@ CARES_EMBED = get_config_value('CARES_EMBED', 'EMBED', 'c-ares')
 
 define_macros = []
 libraries = []
-libev_configure_command = ["/bin/sh", abspath('libev/configure'), '> configure-output.txt']
-ares_configure_command = ["/bin/sh", abspath('c-ares/configure'), 'CONFIG_COMMANDS= CONFIG_FILES= > configure-output.txt']
+configure_args = sysconfig.get_config_var("CONFIG_ARGS")
+libev_configure_command = ["/bin/sh", abspath('libev/configure'), configure_args, '> configure-output.txt']
+ares_configure_command = ["/bin/sh", abspath('c-ares/configure'), configure_args, 'CONFIG_COMMANDS= CONFIG_FILES= > configure-output.txt']
 
 
 if sys.platform == 'win32':
